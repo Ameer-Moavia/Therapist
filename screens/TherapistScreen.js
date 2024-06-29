@@ -6,7 +6,7 @@ import { Colors, Fonts, Sizes, screenWidth } from '../constants/styles';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Feather from 'react-native-vector-icons/Feather';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation,DrawerActions} from '@react-navigation/native';
 import { Icon } from 'react-native-elements';
 import { database } from './firebase';
 import { ref as databaseRef, set, push, get, onValue, query, orderByChild, equalTo ,update} from 'firebase/database';
@@ -19,6 +19,7 @@ const TherapistScreen = () => {
   const [profileImageUri, setProfileImageUri] = useState('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTet-jk67T6SYdHW04eIMLygHzEeJKobi9zdg&usqp=CAU');
   const [data, setData] = useState(true);
   const [Appointments, setAppointments] = useState([]);
+  const [userEmail, setUserEmail] = useState("");
   useEffect(() => {
     const fetchName = async () => {
       try {
@@ -111,43 +112,56 @@ const TherapistScreen = () => {
   navigation.navigate('Message', { receiver,currentUser});
     console.log(data)
   }
+  const ViewReports=(data)=>{
 
-  const fetchAppoinmentsData = () => {
-    try{
+  navigation.navigate('TestReports', { email : data.user});
+     }
 
-      const AppointmentsRef =  databaseRef(database, 'Appointments'); // Reference to 'doctors' node in database
-
-    // Listen for changes to the data at the doctorsRef
-    onValue(AppointmentsRef, (snapshot) => {
-      const data = snapshot.val(); // Extract data from snapshot
-      if (data) {
-        // Convert object to array of doctors and set state
-        const AppointmentsArray = Object.values(data);
-        setAppointments(AppointmentsArray);
+  useEffect(() => {
+    const getUserEmail = async () => {
+      try {
+        const user = await AsyncStorage.getItem('emailS');
+        const storedUserEmail = await AsyncStorage.getItem(`userEmail_${user}`);
+        if (storedUserEmail) {
+          setUserEmail(storedUserEmail.replace(/[\[\]"]+/g, ''));
+        }
+      } catch (error) {
+        console.error('Error retrieving user email from AsyncStorage:', error);
       }
-    });
-    }catch(err){
+    };
 
-      console.log(err)
+    getUserEmail();
+  }, []);
+
+  const fetchAppointmentsData = () => {
+    try {
+      const appointmentsRef = databaseRef(database, 'Appointments');
+      onValue(appointmentsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const appointmentsArray = Object.values(data);
+          const filteredAppointments = appointmentsArray.filter(appointment => appointment.doctorEmail === userEmail);
+          setAppointments(filteredAppointments);
+        }
+      });
+      console.log(Appointments)
+    } catch (err) {
+      console.log(err);
     }
   };
 
   useEffect(() => {
-    fetchAppoinmentsData();   
-  }, []);
+    if (userEmail) {
+      fetchAppointmentsData();
+    }
+  }, [userEmail]);
 
+  
   return (
     <View style={styles.container}>
 
       <View style={styles.Navheader}>
-        <TouchableOpacity onPress={() => navigation.navigate("DrawerNav")}>
-          <MaterialCommunityIcons
-            name="menu"
-            size={24}
-            color={Colors.whiteColor}
-            style={styles.icon}
-          />
-        </TouchableOpacity>
+
         <Text style={styles.title}>Home</Text>
         <TouchableOpacity onPress={() => handleNotifications()}>
           <MaterialCommunityIcons
@@ -220,6 +234,11 @@ const TherapistScreen = () => {
               {Appointment.status === 'Approved' && (
                 <TouchableOpacity style={styles.messageButton} onPress={()=>Message(Appointment)}>
                   <MaterialIcons name="message" size={26} color={Colors.primaryColor} />
+                </TouchableOpacity>
+              )}
+               {Appointment.status === 'Approved' && (
+                <TouchableOpacity style={styles.ViewReports} onPress={()=>ViewReports(Appointment)}>
+                  <MaterialIcons name="table-view" size={26} color={Colors.primaryColor} />
                 </TouchableOpacity>
               )}
               </View>
@@ -309,6 +328,7 @@ const styles = StyleSheet.create({
   title: {
     ...Fonts.whiteColor20SemiBold,
     textAlign: "center",
+    paddingLeft:2
   },
   icon: {
     paddingHorizontal: Sizes.fixPadding,
@@ -383,6 +403,10 @@ const styles = StyleSheet.create({
   messageButton:{
     position:"absolute",
     right:10,
+  },
+  ViewReports:{
+    position:"absolute",
+    right:45,
   }
 });
 

@@ -11,7 +11,6 @@ const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Sat
 const TimeSlotsScreen = ({ route }) => {
   const navigation = useNavigation();
   const email = route.params.email;
-
   const [selectedDay, setSelectedDay] = useState(daysOfWeek[0]);
   const [selectedSlots, setSelectedSlots] = useState({});
   const [loading, setLoading] = useState(false);

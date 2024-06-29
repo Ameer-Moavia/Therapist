@@ -4,7 +4,7 @@ import { useFonts } from 'expo-font';
 
 
 export const Colors = {
-  primaryColor: '#BF40BF',
+  primaryColor: '#e38472',
   lightPrimaryColor: 'rgba(15, 52, 96, 0.05)',
   whiteColor: '#FFFFFF',
   blackColor: '#000000',

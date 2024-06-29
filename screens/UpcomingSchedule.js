@@ -10,32 +10,46 @@ import { database } from './firebase';
 import { ref as databaseRef, get,onValue,off } from 'firebase/database';
 const UpcomingSchedule = () => {  
   const navigation = useNavigation(); // Get navigation object
+  const [userEmail, setUserEmail] = useState("");
   const [Appointments, setAppointments] = useState([]);
 
-  const fetchAppoinmentsData = () => {
-    try{
-
-      const AppointmentsRef =  databaseRef(database, 'Appointments'); // Reference to 'doctors' node in database
-
-    // Listen for changes to the data at the doctorsRef
-    onValue(AppointmentsRef, (snapshot) => {
-      const data = snapshot.val(); // Extract data from snapshot
-      if (data) {
-        // Convert object to array of doctors and set state
-        const AppointmentsArray = Object.values(data);
-        setAppointments(AppointmentsArray);
+  useEffect(() => {
+    const getUserEmail = async () => {
+      try {
+        const user = await AsyncStorage.getItem('emailS');
+        const storedUserEmail = await AsyncStorage.getItem(`userEmail_${user}`);
+        if (storedUserEmail) {
+          setUserEmail(storedUserEmail.replace(/[\[\]"]+/g, ''));
+        }
+      } catch (error) {
+        console.error('Error retrieving user email from AsyncStorage:', error);
       }
-    });
-    }catch(err){
+    };
 
-      console.log(err)
+    getUserEmail();
+  }, []);
+
+  const fetchAppointmentsData = () => {
+    try {
+      const appointmentsRef = databaseRef(database, 'Appointments');
+      onValue(appointmentsRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const appointmentsArray = Object.values(data);
+          const filteredAppointments = appointmentsArray.filter(appointment => appointment.doctorEmail === userEmail);
+          setAppointments(filteredAppointments);
+        }
+      });
+    } catch (err) {
+      console.log(err);
     }
   };
 
   useEffect(() => {
-    fetchAppoinmentsData();   
-  }, []);
-
+    if (userEmail) {
+      fetchAppointmentsData();
+    }
+  }, [userEmail]);
   const reject = async (id) => {
     
     try{
@@ -99,7 +113,11 @@ const UpcomingSchedule = () => {
   }
 
   
- 
+  const ViewReports=(data)=>{
+
+    navigation.navigate('TestReports', { email : data.user});
+       }
+  
 
 
 
@@ -131,6 +149,11 @@ const UpcomingSchedule = () => {
               {Appointment.status === 'Approved' && (
                 <TouchableOpacity style={styles.messageButton} onPress={()=>Message(Appointment)}>
                   <MaterialIcons name="message" size={26} color={Colors.primaryColor} />
+                </TouchableOpacity>
+              )}
+              {Appointment.status === 'Approved' && (
+                <TouchableOpacity style={styles.ViewReports} onPress={()=>ViewReports(Appointment)}>
+                  <MaterialIcons name="table-view" size={26} color={Colors.primaryColor} />
                 </TouchableOpacity>
               )}
               </View>
@@ -208,6 +231,9 @@ const styles = StyleSheet.create({
   messageButton:{
     position:"absolute",
     right:10,
+  }, ViewReports:{
+    position:"absolute",
+    right:45,
   }
 });
 

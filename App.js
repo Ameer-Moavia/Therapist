@@ -8,9 +8,14 @@ import BottomTabBarScreen from "./components/bottomTabBarScreen";
 import CompleteDetailsScreen from "./screens/CompleteDetailsScreen";
 import DetailsScreen2 from "./screens/DetailsScreen2";
 import TimeSlotsScreen from "./screens/TimeSlotsScreen";
-import DrawerNav from "./screens/DrawerNav";
+import DrawerNavigator from "./DrawerNavigator";
 import Message from "./screens/Message";
 import ForgotPasswordScreen from "./screens/ForgotPasswordScreen";
+import 'react-native-gesture-handler';
+import Settings from "./screens/settings";
+import UpdateTimeSlotsScreen from "./screens/UpdateTimeSlotsScreen";
+import TestReports from "./screens/TestReports";
+
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -32,12 +37,15 @@ const App = () => {
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="TimeSlotsScreen" component={TimeSlotsScreen} />
         <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} />
-        <Stack.Screen name="DrawerNav" component={DrawerNav} />
         <Stack.Screen name="CompleteDetailsScreen" component={CompleteDetailsScreen} />
         <Stack.Screen name="BottomTabBarScreen" component={BottomTabBarScreen} />
         <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
         <Stack.Screen name="DetailsScreen2" component={DetailsScreen2} />
         <Stack.Screen name="Message" component={Message} />
+         <Stack.Screen name="Drawer" component={DrawerNavigator} />
+         <Stack.Screen name="Settings" component={Settings} />
+         <Stack.Screen name="UpdateTimeSlotsScreen" component={UpdateTimeSlotsScreen} />
+         <Stack.Screen name="TestReports" component={TestReports} />
       </Stack.Navigator>
     </NavigationContainer>
   );
